@@ -70,7 +70,7 @@ public class Matrix {
 
         @Override
         protected Integer compute() {
-            if (endRow - startRow <= 10) { // Порог для последовательного выполнения
+            if (endRow - startRow <= 10) {
                 int localMin = Integer.MAX_VALUE;
                 for (int i = startRow; i < endRow; i++) {
                     for (int j = i + 1; j < matrix.length; j++) {

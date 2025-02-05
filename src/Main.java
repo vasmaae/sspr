@@ -22,13 +22,9 @@ public class Main {
             printResults("ForkJoinPoll", min, endTime - startTime);
 
         } catch (NumberFormatException e) {
-            System.out.println("Вводи только числа и ничего другого, быдло.");
+            System.out.println("Put numbers, not a letters, stupid idiot.");
         } catch (Exception e) {
-            System.out.println("Coś poszło nie tak, po prostu zerżnąłem — pierdolę, pieprzyłem jego matkę, " +
-                    "pieprzyłem jego siostrę, łamałem głowę cegłami, zrzucałem z balkonu, przewracałem, " +
-                    "znowu pieprzyłem, potem jego ojca w dupę pieprzyłem, potem kazałem jego ojcu pieprzyć w dupę jego siostrę, " +
-                    "suko, a jego, pedarasa, kurwa, zmuszałem to wszystko do oglądania, a potem gówno zjadło ogólne " +
-                    "(to, co wszyscy jego pieprzeni krewni nosili), kurwa. Kurwa idzie.");
+            System.out.println("Kurwa idzie.");
         }
     }
 

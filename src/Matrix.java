@@ -9,7 +9,6 @@ public class Matrix {
         matrix = new int[rows][cols];
         this.numberOfChars = numberOfChars;
         Random rand = new Random();
-        System.out.println(1000 * numberOfChars);
 
         for (int i = 0; i < rows; i++)
             for (int j = 0; j < cols; j++)

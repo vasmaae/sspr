@@ -29,6 +29,6 @@ public class Main {
     }
 
     private static void printResults(String algorithm, int min, long time) {
-        System.out.println(algorithm + ": min = " + min + ", time = " + time);
+        System.out.println(algorithm + ": min = " + min + ", time = " + time / 1000000);
     }
 }

@@ -3,7 +3,7 @@ public class Main {
         try {
             long startTime = 0, endTime = 0;
             int min = 0;
-            Matrix matrix = new Matrix(Integer.parseInt(args[0]), Integer.parseInt(args[1]));
+            Matrix matrix = new Matrix(Integer.parseInt(args[0]), Integer.parseInt(args[1]), Integer.parseInt(args[2]));
             System.out.println(matrix);
 
             startTime = System.nanoTime();

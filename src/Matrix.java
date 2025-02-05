@@ -1,14 +1,19 @@
+import java.util.Random;
 import java.util.concurrent.*;
 
 public class Matrix {
     private final int[][] matrix;
+    private final int numberOfChars;
 
-    public Matrix(int rows, int cols) {
+    public Matrix(int rows, int cols, int numberOfChars) {
         matrix = new int[rows][cols];
+        this.numberOfChars = numberOfChars;
+        Random rand = new Random();
+        System.out.println(1000 * numberOfChars);
 
         for (int i = 0; i < rows; i++)
             for (int j = 0; j < cols; j++)
-                matrix[i][j] = (int) (Math.random() * 100);
+                matrix[i][j] = rand.nextInt((int) Math.pow(10, numberOfChars));
     }
 
     public int processMatrixSingleThread() {
@@ -108,7 +113,7 @@ public class Matrix {
 
         for (int i = 0; i < matrix.length; i++) {
             for (int j = 0; j < matrix[i].length; j++) {
-                sb.append(String.format("%2d", matrix[i][j]));
+                sb.append(String.format("%" + numberOfChars + "d", matrix[i][j]));
                 sb.append(" ");
             }
             sb.append("\n");

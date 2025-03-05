@@ -28,7 +28,7 @@ public class Main {
         } catch (NumberFormatException e) {
             System.out.println("Put numbers, not a letters, stupid idiot.");
         } catch (Exception e) {
-            System.out.println("Kurwa idzie.\n" + e);
+            System.out.println(e.getMessage());
         }
     }
 

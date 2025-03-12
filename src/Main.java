@@ -1,17 +1,14 @@
 public class Main {
     public static void main(String[] args) {
         try {
-//            temporary убрал ибо хз чо там в mpi
-//            if (args.length != 4) // размеры матрицы, количество цифр в числе (хз зачем сделал, но уже лень убирать) и аргумент сколько лаб запускать
-//                throw new IllegalArgumentException("Put fucking numbers into a fucking command line.");
-
-            Matrix matrix = new Matrix(Integer.parseInt(args[0]),
-                    Integer.parseInt(args[1]), Integer.parseInt(args[2]));
+            // fix: аргументы из-за mpj сбились
+            Matrix matrix = new Matrix(Integer.parseInt(args[3]),
+                    Integer.parseInt(args[4]), Integer.parseInt(args[5]));
             System.out.println(matrix);
 
-            if (args[3].contains("1"))
+            if (args[6].contains("1"))
                 demoLab1(matrix);
-            if (args[3].contains("2"))
+            if (args[6].contains("2"))
                 demoLab2(matrix, args);
 
         } catch (NumberFormatException e) {

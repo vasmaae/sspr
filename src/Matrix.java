@@ -1,5 +1,9 @@
 import mpi.MPI;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.time.LocalTime;
 import java.util.Random;
 
 public class Matrix {
@@ -25,6 +29,13 @@ public class Matrix {
 
     public int processMatrixMPI(String args[]) {
         MPI.Init(args);
+        String filePath = "/root/mpj.log";
+        File file = new File(filePath);
+        try (FileWriter writer = new FileWriter(file, true)) {
+            writer.write("Connection established: " + LocalTime.now() + "\n");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         int rank = MPI.COMM_WORLD.Rank();
         int size = MPI.COMM_WORLD.Size();
         int[] globalMin = new int[1];

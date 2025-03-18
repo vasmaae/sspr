@@ -26,16 +26,6 @@ public class Main {
         min = matrix.processMatrixSingleThread();
         endTime = System.nanoTime();
         printResults("SingleThread", min, endTime - startTime);
-
-        startTime = System.nanoTime();
-        min = matrix.processMatrixThreadPoolExecutor();
-        endTime = System.nanoTime();
-        printResults("ThreadPoolExecutor", min, endTime - startTime);
-
-        startTime = System.nanoTime();
-        min = matrix.processMatrixForkJoinPoll();
-        endTime = System.nanoTime();
-        printResults("ForkJoinPoll", min, endTime - startTime);
     }
 
     private static void demoLab2(Matrix matrix, String[] args) {

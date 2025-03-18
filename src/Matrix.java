@@ -23,42 +23,6 @@ public class Matrix {
         return min;
     }
 
-    public int processMatrixThreadPoolExecutor() {
-//        int numThreads = Runtime.getRuntime().availableProcessors();
-//
-//        try (ExecutorService executorService = Executors.newFixedThreadPool(numThreads)) {
-//            List<Future<Integer>> futures = new ArrayList<>();
-//
-//            for (int i = 0; i < matrix.length - 1; i++) {
-//                final int row = i;
-//
-//                futures.add(executorService.submit(() -> {
-//                    int min = matrix[row][row + 1];
-//                    for (int j = row + 1; j < matrix[row].length; j++)
-//                        min = Math.min(min, matrix[row][j]);
-//                    return min;
-//                }));
-//            }
-//
-//            int min = futures.getFirst().get();
-//            for (Future<Integer> future : futures)
-//                min = Math.min(min, future.get());
-//
-//
-//            executorService.shutdown();
-//            return min;
-//        } catch (ExecutionException | InterruptedException e) {
-//            System.out.println(e.getMessage());
-//            return 0;
-//        }
-        return 0;
-    }
-
-    public int processMatrixForkJoinPoll() {
-//        return new ForkJoinMinFinder().findMin();
-        return 0;
-    }
-
     public int processMatrixMPI(String args[]) {
         MPI.Init(args);
         int rank = MPI.COMM_WORLD.Rank();
@@ -162,44 +126,4 @@ public class Matrix {
         }
         return sb.toString();
     }
-
-//    private class ForkJoinMinFinder extends RecursiveTask<Integer> {
-//        private static final int THRESHOLD = 10;
-//        private final int start, end;
-//
-//        public ForkJoinMinFinder() {
-//            this.start = 0;
-//            this.end = matrix.length;
-//        }
-//
-//        public ForkJoinMinFinder(int start, int end) {
-//            this.start = start;
-//            this.end = end;
-//        }
-//
-//        @Override
-//        protected Integer compute() {
-//            if (end - start <= THRESHOLD) {
-//                int min = matrix[start][start + 1];
-//                for (int i = start; i < end - 1; i++)
-//                    for (int j = i + 1; j < matrix[i].length; j++)
-//                        min = Math.min(min, matrix[i][j]);
-//                return min;
-//            } else {
-//                int mid = (start + end) / 2;
-//                ForkJoinMinFinder leftTask = new ForkJoinMinFinder(start, mid);
-//                ForkJoinMinFinder rightTask = new ForkJoinMinFinder(mid, end);
-//                leftTask.fork();
-//                int rightRes = rightTask.compute();
-//                int leftRes = leftTask.join();
-//                return Math.min(leftRes, rightRes);
-//            }
-//        }
-//
-//        public int findMin() {
-//            try (ForkJoinPool pool = new ForkJoinPool()) {
-//                return pool.invoke(new ForkJoinMinFinder());
-//            }
-//        }
-//    }
 }

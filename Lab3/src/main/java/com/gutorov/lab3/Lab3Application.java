@@ -1,7 +1,9 @@
 package com.gutorov.lab3;
 
 import com.gutorov.lab3.client.MatrixClient;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+@SpringBootApplication
 public class Lab3Application {
     public static void main(String[] args) {
         try {

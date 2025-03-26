@@ -20,5 +20,6 @@ public class Lab3Application {
         long startTime = System.currentTimeMillis();
         int min = matrixClient.findMinAboveDiagonal();
         long endTime = System.currentTimeMillis();
+        System.out.println("Min above diagonal: " + min);
     }
 }

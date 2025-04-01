@@ -12,7 +12,6 @@ repositories {
 
 dependencies {
     implementation 'org.apache.ignite:ignite-core:2.15.0'
-    implementation 'org.apache.ignite:ignite-spring:2.15.0'
     implementation 'org.slf4j:slf4j-api:1.7.36'
     implementation 'org.slf4j:slf4j-simple:1.7.36'
 }
@@ -22,7 +21,7 @@ application {
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_11
+    sourceCompatibility = JavaVersion.VERSION_17
     targetCompatibility = JavaVersion.VERSION_17
 }
 

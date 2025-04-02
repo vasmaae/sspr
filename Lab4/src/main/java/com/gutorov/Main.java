@@ -2,76 +2,133 @@ package com.gutorov;
 
 import org.apache.ignite.Ignite;
 import org.apache.ignite.Ignition;
-import org.apache.ignite.cluster.ClusterNode;
+import org.apache.ignite.cluster.ClusterGroup;
+import org.apache.ignite.compute.ComputeJob;
+import org.apache.ignite.compute.ComputeJobAdapter;
+import org.apache.ignite.compute.ComputeJobResult;
+import org.apache.ignite.compute.ComputeTaskSplitAdapter;
 import org.apache.ignite.configuration.IgniteConfiguration;
-import org.apache.ignite.lang.IgniteCallable;
 import org.apache.ignite.spi.discovery.tcp.TcpDiscoverySpi;
 import org.apache.ignite.spi.discovery.tcp.ipfinder.vm.TcpDiscoveryVmIpFinder;
 
+import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 public class Main {
     public static void main(String[] args) {
-        // Конфигурация Ignite для клиентского узла
         IgniteConfiguration cfg = new IgniteConfiguration();
-        cfg.setClientMode(true); // Режим клиента
+        cfg.setClientMode(true);
+        cfg.setPeerClassLoadingEnabled(true);
 
-        TcpDiscoverySpi spi = new TcpDiscoverySpi();
+        TcpDiscoverySpi discoverySpi = new TcpDiscoverySpi();
         TcpDiscoveryVmIpFinder ipFinder = new TcpDiscoveryVmIpFinder();
-        ipFinder.setAddresses(Arrays.asList("192.168.1.101:47500", "192.168.1.102:47500"));
-        spi.setIpFinder(ipFinder);
-        cfg.setDiscoverySpi(spi);
+
+        List<String> addresses = new ArrayList<>();
+        addresses.add("192.168.1.102:47500..47509");
+        ipFinder.setAddresses(addresses);
+        discoverySpi.setIpFinder(ipFinder);
+        discoverySpi.setSocketTimeout(5000);
+        discoverySpi.setAckTimeout(5000);
+        cfg.setDiscoverySpi(discoverySpi);
 
         try (Ignite ignite = Ignition.start(cfg)) {
-            // Пример матрицы (4x4)
-            List<List<Integer>> matrix = new ArrayList<>();
-            matrix.add(Arrays.asList(1, 2, 3, 4));
-            matrix.add(Arrays.asList(5, 6, 7, 8));
-            matrix.add(Arrays.asList(9, 10, 11, 12));
-            matrix.add(Arrays.asList(13, 14, 15, 16));
+            System.out.println("Connected to cluster. Number of nodes: " + ignite.cluster().nodes().size());
 
-            int n = matrix.size(); // Размер матрицы
-            List<ClusterNode> nodes = new ArrayList<>(ignite.cluster().forServers().nodes());
-            int nodesCount = nodes.size();
+            int[][] matrix = generateMatrix(500, 500);
 
-            if (nodesCount == 0) {
-                System.out.println("Нет доступных серверных узлов!");
-                return;
+            // printMatrix(matrix);
+
+            long startTime = System.nanoTime();
+            ClusterGroup computeGroup = ignite.cluster().forServers();
+            Integer min = ignite.compute(computeGroup).execute(new MatrixMinTask(matrix), null);
+            long endTime = System.nanoTime();
+
+            System.out.println("Minimal element above main diagonal: " + min);
+            System.out.println("Execution time: " + (endTime - startTime) / 1_000_000 + " ms");
+        } catch (Exception e) {
+            System.err.println("Failed to start Ignite or execute computation: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    private static int[][] generateMatrix(int rows, int cols) {
+        int[][] matrix = new int[rows][cols];
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                matrix[i][j] = (int) (Math.random() * 100);
+            }
+        }
+        return matrix;
+    }
+
+    private static void printMatrix(int[][] matrix) {
+        System.out.println("Matrix:");
+        for (int[] row : matrix) {
+            for (int val : row) {
+                System.out.print(val + "\t");
+            }
+            System.out.println();
+        }
+    }
+
+    private static class MatrixMinTask extends ComputeTaskSplitAdapter<Void, Integer> implements Serializable {
+        private static final long serialVersionUID = 1L;
+        private final int[][] matrix;
+
+        public MatrixMinTask(int[][] matrix) {
+            this.matrix = matrix;
+        }
+
+        @Override
+        protected List<ComputeJob> split(int gridSize, Void arg) {
+            List<ComputeJob> jobs = new ArrayList<>();
+            int n = matrix.length;
+
+            for (int i = 0; i < n; i++) {
+                jobs.add(new MatrixMinJob(matrix, i));
             }
 
-            long startTime = System.currentTimeMillis();
+            return jobs;
+        }
 
-            // Разделение матрицы по строкам между узлами
-            int rowsPerNode = n / nodesCount;
-            List<IgniteCallable<Integer>> tasks = new ArrayList<>();
+        @Override
+        public Integer reduce(List<ComputeJobResult> results) {
+            int globalMin = Integer.MAX_VALUE;
 
-            for (int i = 0; i < nodesCount; i++) {
-                int startRow = i * rowsPerNode;
-                int endRow = (i == nodesCount - 1) ? n : (i + 1) * rowsPerNode;
-                List<List<Integer>> subMatrix = matrix.subList(startRow, endRow);
-
-                // Создание задачи для каждой подматрицы
-                tasks.add(new MatrixMinTask(subMatrix, startRow, n));
-            }
-
-            // Выполнение всех задач на серверных узлах
-            List<Integer> results = (List<Integer>) ignite.compute().call(tasks);
-
-            // Нахождение общего минимума
-            List<Integer> validResults = new ArrayList<>();
-            for (Integer result : results) {
-                if (result != null) {
-                    validResults.add(result);
+            for (ComputeJobResult res : results) {
+                Integer localMin = res.getData();
+                if (localMin != null && localMin < globalMin) {
+                    globalMin = localMin;
                 }
             }
-            int globalMin = validResults.isEmpty() ? -1 : Collections.min(validResults);
 
-            long endTime = System.currentTimeMillis();
-            System.out.println("Минимальный элемент выше главной диагонали: " + globalMin);
-            System.out.println("Время выполнения: " + (endTime - startTime) + " мс");
+            return globalMin == Integer.MAX_VALUE ? null : globalMin;
+        }
+    }
+
+    private static class MatrixMinJob extends ComputeJobAdapter implements Serializable {
+        private static final long serialVersionUID = 1L;
+        private final int[][] matrix;
+        private final int rowIndex;
+
+        public MatrixMinJob(int[][] matrix, int rowIndex) {
+            this.matrix = matrix;
+            this.rowIndex = rowIndex;
+        }
+
+        @Override
+        public Object execute() {
+            int localMin = Integer.MAX_VALUE;
+            int n = matrix.length;
+
+            for (int j = rowIndex + 1; j < n; j++) {
+                if (matrix[rowIndex][j] < localMin) {
+                    localMin = matrix[rowIndex][j];
+                }
+            }
+
+            return localMin == Integer.MAX_VALUE ? null : localMin;
         }
     }
 }
